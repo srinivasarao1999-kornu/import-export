@@ -1,0 +1,100 @@
+models.py
+from django.db import models
+
+# Create your models here.
+class gunturs(models.Model):
+    cid=models.IntegerField()
+    cname=models.CharField(max_length=100)
+    productname=models.CharField(max_length=100)
+    quality=models.IntegerField()
+    
+    contactno=models.BigIntegerField()
+class Meta:
+    database="gunturs";
+
+admin.py
+from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
+from.models import gunturs
+# Register your models here.
+admin.site.register(gunturs,ImportExportModelAdmin);
+
+urls.py
+from django.contrib import admin
+from django.urls import path
+from gunturs import views
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/',views.register),
+    path('home/',views.home)
+]
+
+views.py
+from django.shortcuts import render
+from django.http import HttpResponse
+from.models import gunturs
+# Create your views here.
+def home(request):
+    post=gunturs.objects.all();
+    if request.method=="POST":
+        st=request.POST.get("firstname");
+    if st!=None:
+        post=gunturs.objects.filter(cname__icontains=st).values()
+        return render(request,"a.html",{'k':'k'})
+
+def gunturs(request):
+    if request.method=="POST":
+        cid=request.POST["cid"]
+        cname=request.POST["cname"] 
+        productname=request.POST["productname"]
+        quantity=request.POST["quantity"]
+        dateofshopping=request.POST["dateofshopping"]
+        contactno=request.POST["contactno"]
+        k=gunturs(cid=cid,cname=cname,productname=productname,quantity=quantity,dateofshopping=dateofshopping,contactno=contactno)
+        k.save();
+    return HttpResponse("record is created")
+    return render(request,"a.html")
+
+a.html
+<html>
+    <head>
+        <title>customer details</title>
+    </head>
+
+    <body>
+
+        <form class="form_inline"method="post">
+            {% csrf_token %}
+            <input type="text"name="cname" placeholder="enter the cnamename">
+            <input type="submit"value="search">
+        </form>
+
+        <table border="2">
+            <tr>
+                <th>cid</th>
+                <th>cname</th>
+                <th>productname</th>
+                <th>quantity</th>
+                <th>dateofshopping</th>
+                <th>contactno</th>
+            </tr>
+
+            {% for i in post %}
+
+            <tr>
+                <td>{{i.cid}}</td>
+                <td>{{i.cname}}</td>
+                <td>{{i.productname}}</td>
+                <td>{{i.quantity}}</td>
+                <td>{{i.dateofshopping}}</td>
+                <td>{{i.contactno}}</td>
+            </tr>
+
+            {% emptyt %}
+            <h1 style="color:red">no records found </h1>
+            {% endfor %}
+            
+        </table>
+    </body>
+</html>
+
